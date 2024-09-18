@@ -36,7 +36,15 @@ def get_thread_replies(client, channel_id, thread_ts):
 def format_timestamp(ts):
     return datetime.fromtimestamp(float(ts)).strftime('%Y-%m-%d %H:%M:%S')
 
-def display_messages(messages, indent=0):
+def get_user_handle(client, user_id):
+    try:
+        result = client.users_info(user=user_id)
+        return result["user"]["name"]
+    except SlackApiError as e:
+        print(f"Error fetching user info: {e}")
+        return user_id
+
+def display_messages(messages, indent=0, client=None):
     # Sort messages by timestamp, oldest first
     sorted_messages = sorted(messages, key=lambda x: float(x['ts']))
     
@@ -46,13 +54,14 @@ def display_messages(messages, indent=0):
             prefix = '│   ' * (indent - 1) + '└── '
         
         timestamp = format_timestamp(message['ts'])
-        user = message.get('user', 'Unknown')
+        user_id = message.get('user', 'Unknown')
+        user_handle = get_user_handle(client, user_id) if client else user_id
         text = message.get('text', '')
         
         if message.get('subtype') == 'channel_join':
             print(f"{prefix}{timestamp} - {text}")
         else:
-            print(f"{prefix}{timestamp} - User {user}: {text}")
+            print(f"{prefix}{timestamp} - @{user_handle}: {text}")
 
         if 'files' in message:
             for file in message['files']:
@@ -60,7 +69,7 @@ def display_messages(messages, indent=0):
 
         if 'replies' in message:
             print(f"{prefix}│")
-            display_messages(message['replies'], indent + 1)
+            display_messages(message['replies'], indent + 1, client)
 
 def main():
     # Simulate the event and context
@@ -116,7 +125,7 @@ def lambda_handler(event, context):
         # Convert messages to JSON
         json_messages = json.dumps(messages, indent=2)
         print("Channel content:")
-        display_messages(messages)
+        display_messages(messages, client=client)
 
         return {
             'statusCode': 200,
