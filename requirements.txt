@@ -1,2 +1,4 @@
 slack_sdk
 boto3
+python_dotenv
+openai

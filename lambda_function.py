@@ -1,4 +1,6 @@
 import os
+
+import openai
 from dotenv import load_dotenv
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -7,6 +9,7 @@ from datetime import datetime
 import re
 
 load_dotenv()
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def extract_channel_id(channel_url):
     match = re.search(r'/([A-Z0-9]+)$', channel_url)
@@ -62,13 +65,39 @@ def display_messages(messages, indent=0):
             print(f"{prefix}│")
             display_messages(message['replies'], indent + 1)
 
-def main():
-    # Simulate the event and context
-    event = {}
-    context = None
-    
-    result = lambda_handler(event, context)
-    print(result)
+def format_message_with_replies(message):
+    # Start with the main message
+    formatted_message = f"Message: {message['text']}\n"
+
+    # If there are replies, add them to the formatted message
+    if 'replies' in message:
+        formatted_message += "Thread replies:\n"
+        for reply in message['replies']:
+            formatted_message += f"- {reply['text']}\n"
+
+    return formatted_message
+
+def categorize_message_with_replies(message):
+    formatted_message = format_message_with_replies(message)
+
+    prompt = f"""
+    Here is a Slack message and its thread replies. Please categorize the conversation into one of these categories: 
+    1. Urgent
+    2. Informative
+    3. Feedback
+    4. Request for Action
+    5. Social/Chit-chat
+    6. Other
+
+    Message and replies: {formatted_message}
+    """
+
+    response = openai.Completion.create(
+        engine="gpt-4",
+        prompt=prompt,
+        max_tokens=150
+    )
+    return response['choices'][0]['text']
 
 def lambda_handler(event, context):
     # Initialize the Slack client
@@ -110,13 +139,13 @@ def lambda_handler(event, context):
             if "thread_ts" in message and message["thread_ts"] == message["ts"]:
                 replies = get_thread_replies(client, channel_id, message["ts"])
                 message["replies"] = replies
+            message["category"] = categorize_message_with_replies(message)
 
-        print(f"Retrieved {len(messages)} messages")
+        print(f"Retrieved {len(messages)} messages from channel {channel_url}")
 
         # Convert messages to JSON
-        json_messages = json.dumps(messages, indent=2)
         print("Channel content:")
-        display_messages(messages)
+        display_messages(json.dumps(messages, indent=2))
 
         return {
             'statusCode': 200,
@@ -129,6 +158,14 @@ def lambda_handler(event, context):
             'statusCode': 500,
             'body': json.dumps(f'Error: {str(e)}')
         }
+
+def main():
+    # Simulate the event and context
+    event = {}
+    context = None
+
+    result = lambda_handler(event, context)
+    print(result)
 
 if __name__ == "__main__":
     main()
