@@ -34,3 +34,17 @@ Thumbs.db
 # Dependency directories
 lib/
 libs/
+
+# Additional dependency directories and files
+bin/
+boto3*/
+botocore*/
+dateutil/
+jmespath*/
+python_dateutil*/
+s3transfer*/
+six*.py
+six*.dist-info/
+slack/
+slack_sdk*/
+urllib3*/
