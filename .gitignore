@@ -1,0 +1,36 @@
+# Python-related
+__pycache__/
+*.py[cod]
+*.so
+
+# Environment variables
+.env
+
+# Virtual environment
+venv/
+env/
+*.venv
+.python-version
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# AWS Lambda deployment package
+*.zip
+
+# Dependency directories
+lib/
+libs/
