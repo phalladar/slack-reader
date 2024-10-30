@@ -14,7 +14,7 @@ This AWS Lambda function exports messages from a specified Slack channel within 
 
 - AWS account with Lambda access
 - Slack workspace with bot token
-- Python 3.8+
+- Python 3.8.*
 
 ## Setup
 

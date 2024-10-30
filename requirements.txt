@@ -2,3 +2,5 @@ slack_sdk
 boto3
 slack_bolt
 jira
+snowflake-snowpark-python
+snowflake-cortex==0.1.0

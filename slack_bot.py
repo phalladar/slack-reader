@@ -50,15 +50,15 @@ def get_permalink(message):
 def say_hello(message, say):
     print(f"message received: {json.dumps(message, indent=2)}")
 
-    jira_issue = create_jira_issue("PROF", "SlackBot Test", "This is a test issue, it can be closed", "Bug", get_permalink(message))
-    reply = {
-        "text":
-            f"""
-            Good news, <@{message['user']}>!\n\nI created a JIRA issue from this message: {jira_issue.permalink()}
-            """,
-        "thread_ts": message["ts"]
-    }
-    say(reply)
+    # jira_issue = create_jira_issue("PROF", "SlackBot Test", "This is a test issue, it can be closed", "Bug", get_permalink(message))
+    # reply = {
+    #     "text":
+    #         f"""
+    #         Good news, <@{message['user']}>!\n\nI created a JIRA issue from this message: {jira_issue.permalink()}
+    #         """,
+    #     "thread_ts": message["ts"]
+    # }
+    # say(reply)
 
 if __name__ == "__main__":
     SocketModeHandler(slack, SLACK_BOT_TOKEN).start()
